@@ -1,7 +1,3 @@
-//var restify = require('restify');
-//var builder = require('botbuilder');
-//var cognitiveservices = require('../../../lib/botbuilder-cognitiveservices');
-
 const builder = require('botbuilder')
 const restify = require('restify')
 const cognitiveservices = require('botbuilder-cognitiveservices')
@@ -54,6 +50,16 @@ var recognizer = new builder.LuisRecognizer(model);
 var intents = new builder.IntentDialog({ recognizers: [recognizer, qnarecognizer, qnarecognizer2, qnarecognizer3] });
 bot.dialog('/', intents);
 
+const message1 = 'Olá, eu sou o **Botão**, pode me chamar de **Seu Botão**, por enquanto so consigo te ajudar com os assuntos abaixo:\n' +
+                    '* **Tirar dúvidas sobre financiamento habitacional**\n' +
+                    '* **Tirar dúvidas sobre financiamento de veículos**\n' +
+                    '* **Tirar dúvidas sobre Bitcoin**\n' +
+                    '* **Verificar a cotação do dia para algumas moedas**\n'
+
+intents.matches('TelegranStart', (session, args, next) => {
+    session.send(message1)
+})
+
 intents.matches('Cumprimento', (session, args, next) => {
     session.send('Olá!, seja bem vindo, o que você deseja?')
 })
@@ -69,11 +75,10 @@ intents.matches('Habitacao', builder.DialogAction.send('Não entendi sua dúvida
 intents.matches('Veiculo', builder.DialogAction.send('Não entendi sua dúvida quanto a **Financiamento de Veiculo**'));
 
 intents.matches('Cotacao', (session, args, next) => {
-    //session.send('olá moeda')
+    
     const moedas = builder.EntityRecognizer.findAllEntities(args.entities, 'Moeda').map(m => m.entity).join(',')
     session.send('Humm, estou consultado, só um segundo!')
-    //const message = moedas.map(m => m.entity).join(',')
-    //session.send(`Eu farei a cotação das moedas **${message}**`)
+
     request(`http://api-cotacoes-maratona-bots.azurewebsites.net/api/Cotacoes/${moedas}`, (err, res, body) => {
         if(err || !body)
             return session.send('Desculpe, não foi possível consultar a cotação')
